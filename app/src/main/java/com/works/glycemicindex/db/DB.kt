@@ -117,6 +117,13 @@ class DB (context: Context?, name: String? = "project.db", factory: SQLiteDataba
         return count
     }
 
+    fun moveFood(foodID: Int, tableName: String) {
+        val write = this.writableDatabase
+        val values = ContentValues()
+        values.put("foodID", foodID)
+        values.put("tableName", tableName)
+        write.update("foods", values, "foodID = ?", arrayOf(foodID.toString()))
+    }
 
     fun updateFood(foodID: Int, name: String, glycemic:Int, carbohydrate: Float, calorie: Int, tableName: String) {
         val write = this.writableDatabase
@@ -138,26 +145,6 @@ class DB (context: Context?, name: String? = "project.db", factory: SQLiteDataba
         values.put("tableName", tableName)
 
         return write.update("tableNames", values, "tableID = ?", arrayOf(tableID.toString()))
-    }
-
-    fun sortFood() : ArrayList<FoodModel> {
-        val list = ArrayList<FoodModel>()
-        val read = this.readableDatabase
-        val querySql = "SELECT * FROM foods ORDER BY name ASC" //Türkçe karakterler sorun yaratıyor
-
-        val cursor = read.rawQuery(querySql, null)
-        while (cursor.moveToNext()) {
-            val foodID = cursor.getInt(0)
-            val name = cursor.getString(1)
-            val glycemic = cursor.getInt(2)
-            val carbohydrate = cursor.getFloat(3)
-            val calorie = cursor.getInt(4)
-            val tableName = cursor.getString(5)
-
-            val f = FoodModel(foodID, name, glycemic, carbohydrate, calorie, tableName)
-            list.add(f)
-        }
-        return list
     }
 
     fun filterFood( filter: String= "nofilter", minIndex: Int = 0, maxIndex: Int = 999) : ArrayList<FoodModel> {

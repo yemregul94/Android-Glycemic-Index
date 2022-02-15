@@ -5,6 +5,7 @@ import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.works.glycemicindex.R
@@ -48,6 +49,9 @@ class TableDetail : AppCompatActivity() {
 
                 db.updateTable(tableID, newName)
                 Toast.makeText(this@TableDetail, "Tablo Güncellendi", Toast.LENGTH_SHORT).show()
+                db.filterFood(tableName!!).forEach {
+                    db.moveFood(it.foodID!!, newName)
+                }
 
             })
             alert.show()
