@@ -8,11 +8,9 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.*
 import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.works.glycemicindex.R
 import com.works.glycemicindex.adapters.HomeAdapter
 import com.works.glycemicindex.databinding.FragmentHomeBinding
 import com.works.glycemicindex.db.DB
@@ -28,32 +26,29 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
 
-    ): View {
+        ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = bind.root
         setHasOptionsMenu(true)
 
-            val fab: View = bind.floatingActionButton
-            fab.setOnClickListener { view ->
-
             val checkLayout = LinearLayout(bind.root.context)
-                checkLayout.orientation = LinearLayout.VERTICAL
+            checkLayout.orientation = LinearLayout.VERTICAL
 
             val rangeLayout = LinearLayout(bind.root.context)
-                rangeLayout.orientation = LinearLayout.HORIZONTAL
+            rangeLayout.orientation = LinearLayout.HORIZONTAL
 
             var minTxt = EditText(bind.root.context)
-                minTxt.hint = "Min Değer"
-                minTxt.inputType = InputType.TYPE_CLASS_NUMBER
-                minTxt.gravity = Gravity.CENTER
+            minTxt.hint = "Min Değer"
+            minTxt.inputType = InputType.TYPE_CLASS_NUMBER
+            minTxt.gravity = Gravity.CENTER
             var maxTxt = EditText(bind.root.context)
-                maxTxt.hint = "Max Değer"
-                maxTxt.inputType = InputType.TYPE_CLASS_NUMBER
-                maxTxt.gravity = Gravity.CENTER
+            maxTxt.hint = "Max Değer"
+            maxTxt.inputType = InputType.TYPE_CLASS_NUMBER
+            maxTxt.gravity = Gravity.CENTER
 
-                rangeLayout.addView(minTxt)
-                rangeLayout.addView(maxTxt)
-                rangeLayout.gravity = Gravity.CENTER
+            rangeLayout.addView(minTxt)
+            rangeLayout.addView(maxTxt)
+            rangeLayout.gravity = Gravity.CENTER
 
             DB(bind.root.context).getTableNames().forEachIndexed { index, str ->
                 val checkBox = CheckBox(bind.root.context)
@@ -64,38 +59,54 @@ class HomeFragment : Fragment() {
             }
 
             val customLayout = LinearLayout(bind.root.context)
-                customLayout.orientation = LinearLayout.VERTICAL
+            customLayout.orientation = LinearLayout.VERTICAL
 
             customLayout.addView(rangeLayout)
             customLayout.addView(checkLayout)
 
-            val alert = AlertDialog.Builder(bind.root.context)
-            alert.setTitle("Filtreleme Penceresi")
-            alert.setView(customLayout)
-            alert.setNegativeButton("İptal", DialogInterface.OnClickListener { dialogInterface, i ->  })
-            alert.setPositiveButton("Uygula", DialogInterface.OnClickListener { dialogInterface, i ->
-                var min = minTxt.text.toString()
-                var max = maxTxt.text.toString()
-                val filterStr = ArrayList<String>()
+        val alert = AlertDialog.Builder(bind.root.context)
+        alert.setTitle("Filtreleme Penceresi")
+        alert.setView(customLayout)
 
-                DB(bind.root.context).getTableNames().forEachIndexed { index, s ->
-                    val item = checkLayout.get(index) as CheckBox
-                    if(item.isChecked){
-                        filterStr.add(item.text.toString())
+        val fab: View = bind.floatingActionButton
+        fab.setOnClickListener { view ->
+
+            alert.setNegativeButton(
+                "İptal",
+                DialogInterface.OnClickListener { dialogInterface, i -> })
+            alert.setPositiveButton(
+                "Uygula",
+                DialogInterface.OnClickListener { dialogInterface, i ->
+                    var min = minTxt.text.toString()
+                    var max = maxTxt.text.toString()
+                    val filterStr = ArrayList<String>()
+
+                    DB(bind.root.context).getTableNames().forEachIndexed { index, s ->
+                        val item = checkLayout.get(index) as CheckBox
+                        if (item.isChecked) {
+                            filterStr.add(item.text.toString())
+                        }
                     }
-                }
 
-                if (TextUtils.isEmpty(min)){
-                    min = "0"
-                }
-                if (TextUtils.isEmpty(max)){
-                    max = "999"
-                }
+                    if (TextUtils.isEmpty(min)) {
+                        min = "0"
+                    }
+                    if (TextUtils.isEmpty(max)) {
+                        max = "999"
+                    }
 
-                val filterFoods = DB(bind.root.context).filterMultipleFood(filterStr, min.toInt(), max.toInt())
-                bind.foodList.adapter = HomeAdapter(filterFoods)
-            })
+                    val filterFoods = DB(bind.root.context).filterMultipleFood(
+                        filterStr,
+                        min.toInt(),
+                        max.toInt()
+                    )
+                    bind.foodList.adapter = HomeAdapter(filterFoods)
+                })
             alert.show()
+        }
+
+        alert.setOnDismissListener {
+            (customLayout.getParent() as ViewGroup).removeView(customLayout)
         }
 
         return root
@@ -113,7 +124,8 @@ class HomeFragment : Fragment() {
 
     fun updateView() {
         val db = DB(bind.root.context)
-        bind.foodList.layoutManager = LinearLayoutManager(bind.root.context, LinearLayoutManager.VERTICAL, false)
+        bind.foodList.layoutManager =
+            LinearLayoutManager(bind.root.context, LinearLayoutManager.VERTICAL, false)
         val foods = db.allFood()
         bind.foodList.adapter = HomeAdapter(foods)
     }
